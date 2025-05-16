@@ -1,0 +1,813 @@
+
+package project2;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Scanner;
+import java.io.IOException;
+
+public class Project2 {
+
+    // Book attributes
+    public static ArrayList<Integer> isbn = new ArrayList<>();
+    public static ArrayList<String> titles = new ArrayList<>();
+    public static ArrayList<String> authors = new ArrayList<>();
+    public static ArrayList<String> publishers = new ArrayList<>();
+    public static ArrayList<Integer> publicationYrs = new ArrayList<>();
+    public static ArrayList<Integer> quantities = new ArrayList<>();
+    public static ArrayList<Boolean> availability = new ArrayList<>();
+
+    // Member attributes
+    public static ArrayList<Integer> memberIDs = new ArrayList<>();
+    public static ArrayList<String> memberNames = new ArrayList<>();
+    public static ArrayList<String> memberEmails = new ArrayList<>();
+    public static ArrayList<Integer> memberPhones = new ArrayList<>();
+    public static ArrayList<String> hireDates = new ArrayList<>();
+    public static ArrayList<Double> salaries = new ArrayList<>();
+
+    // Staff attributes
+    public static ArrayList<Integer> staffIDs = new ArrayList<>();
+    public static ArrayList<String> staffNames = new ArrayList<>();
+    public static ArrayList<String> staffEmails = new ArrayList<>();
+    public static ArrayList<Integer> staffPhones = new ArrayList<>();
+
+    public static final String BOOK_FILE = "books.txt";
+    public static final String MEMBER_FILE = "members.txt";
+    public static final String STAFF_FILE = "staff.txt";
+
+    public static void main(String[] args) {
+        if (login()) {
+            mainMenu();
+        } else {
+          System.out.println("Invalid login. Exiting...");
+    }
+    }//main method
+
+    public static boolean login() {
+        Scanner input = new Scanner(System.in);
+        System.out.print("Enter username: ");
+        String username = input.nextLine();
+        System.out.print("Enter password: ");
+        String password = input.nextLine();
+        return username.equals("admin") && password.equals("123");
+    }//login method
+
+    public static void mainMenu() {
+        while (true) {
+            Scanner input = new Scanner(System.in);
+            System.out.println("\nMain Menu:");
+            System.out.println("1. Books");
+            System.out.println("2. Members");
+            System.out.println("3. Staff");
+            System.out.println("4. Exit");
+            System.out.print("Enter your choice: ");
+            int choice = input.nextInt();
+            input.nextLine();
+
+            switch (choice) {
+                case 1:
+                    bookMenu();
+                    break;
+                case 2:
+                    memberMenu();
+                    break;
+                case 3:
+                    staffMenu();
+                    break;
+                case 4:
+                    System.exit(0);
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }//main menu
+
+// Book menu
+    public static void bookMenu() {
+        while (true) {
+            Scanner input = new Scanner(System.in);
+            System.out.println("\nBooks");
+            System.out.println("1. Add Book");
+            System.out.println("2. Display All Books");
+            System.out.println("3. Search Books");
+            System.out.println("4. Delete Book");
+            System.out.println("5. Edit Book");
+            System.out.println("6. Back to Main Menu");
+            System.out.print("Enter your choice: ");
+            int choice = input.nextInt();
+            input.nextLine(); 
+
+            switch (choice) {
+                case 1:
+                    addBook(input);
+                    break;
+                case 2:
+                    displayBooks();
+                    break;
+                case 3:
+                    searchBook();
+                    break;
+                case 4:
+                    deleteBook();
+                    break;
+                case 5:
+                    editBook();
+                    break;
+                case 6:
+                    return;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
+
+    public static void addBook(Scanner input) {
+        System.out.print("Enter ISBN: ");
+        int serial = input.nextInt();
+        input.nextLine();
+        System.out.print("Enter Title: ");
+        String title = input.nextLine();
+        System.out.print("Enter Author: ");
+        String author = input.nextLine();
+        System.out.print("Enter Publisher: ");
+        String publisher = input.nextLine();
+        System.out.print("Enter Publication Year: ");
+        int pubYear = input.nextInt();
+        System.out.print("Enter Quantity: ");
+        int quantity = input.nextInt();
+        input.nextLine();
+
+        isbn.add(serial);
+        titles.add(title);
+        authors.add(author);
+        publishers.add(publisher);
+        publicationYrs.add(pubYear);
+        quantities.add(quantity);
+        availability.add(quantity > 0);
+
+        writeBooksToFile();
+        System.out.println("Book added successfully.");
+    }
+
+    public static void displayBooks() {
+        System.out.println("ISBN\t\tTitle\t\t\tAuthor\t\t\tPublisher\t\tYear\tQty\tAvailability");
+        try (BufferedReader reader = new BufferedReader(new FileReader(BOOK_FILE))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                //used printf for formatted output
+                System.out.printf("%-10s\t%-20s\t%-20s\t%-20s\t%-4s\t%-3s\t%-10s\n", 
+                    parts[0].trim(), 
+                    parts[1].trim(), 
+                    parts[2].trim(), 
+                    parts[3].trim(), 
+                    parts[4].trim(), 
+                    parts[5].trim(), 
+                    parts[6].trim());
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading books data: " + e.toString());
+        }
+    }
+    
+    public static void searchBook() {
+    Scanner input = new Scanner(System.in);
+    System.out.print("Enter book ISBN to search: ");
+    int isbn = input.nextInt();
+    input.nextLine(); 
+
+    boolean found = false;
+
+    try (BufferedReader reader = new BufferedReader(new FileReader(BOOK_FILE))) {
+        String line;
+        while ((line = reader.readLine()) != null) {
+            String[] parts = line.split(",");
+            int bookIsbn = Integer.parseInt(parts[0].trim());
+            if (bookIsbn == isbn) {
+                found = true;
+                String tit = parts[1].trim();
+                String aut = parts[2].trim();
+                String pub = parts[3].trim();
+                int pubYr = Integer.parseInt(parts[4].trim());
+                int qty = Integer.parseInt(parts[5].trim());
+                boolean avail = Boolean.parseBoolean(parts[6].trim());
+
+                System.out.println("Book found:");
+                System.out.println("ISBN: " + bookIsbn);
+                System.out.println("Title: " + tit);
+                System.out.println("Author: " + aut);
+                System.out.println("Publisher: " + pub);
+                System.out.println("Publication Yr: " + pubYr);
+                System.out.println("Quantity: " + qty);
+                System.out.println("Availability: " + avail);
+                break;
+            }
+        }
+        if (!found) {
+            System.out.println("Book not found.");
+        }
+    } catch (IOException e) {
+        System.out.println("Error reading book data: " + e.getMessage());
+    }
+}
+
+    public static void deleteBook() {
+        Scanner input = new Scanner(System.in);
+        System.out.print("Enter ISBN of the book to delete: ");
+        int serial = input.nextInt();
+        input.nextLine(); // Consume newline
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(BOOK_FILE))) {
+            ArrayList<String> lines = new ArrayList<>();
+            String line;
+            boolean found = false;
+
+            //reading file lineby line
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (Integer.parseInt(parts[0]) == serial) { //check if ISBN matches
+                    found = true;
+                } else {
+                    lines.add(line); //add line tolist if ISBN doesn't match
+                }
+            }
+            if (found) {
+                //overwrite file with updated data (excluding the deleted book)
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter(BOOK_FILE))) {
+                    for (String updatedLine : lines) {
+                        writer.write(updatedLine);
+                        writer.newLine();
+                    }
+                }
+                System.out.println("Book deleted successfully.");
+            } else {
+                System.out.println("Book not found.");
+            }
+        } catch (IOException e) {
+            System.out.println("Error deleting book: " + e.toString());
+        }
+    }
+
+    public static void editBook() {
+        Scanner input = new Scanner(System.in);
+        System.out.print("Enter book ISBN to edit: ");
+        int isbn = input.nextInt();
+        input.nextLine();
+
+        // Temporary storage for updated book data
+        ArrayList<String> updatedBookData = new ArrayList<>();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(BOOK_FILE))) {
+            String line;
+            boolean found = false;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                int bookIsbn = Integer.parseInt(parts[0].trim());
+                if (bookIsbn == isbn) {
+                    //book found, prompt for new data
+                    System.out.print("Enter new Title: ");
+                    String title = input.nextLine();
+                    System.out.print("Enter new Author: ");
+                    String author = input.nextLine();
+                    System.out.print("Enter new Publisher: ");
+                    String publisher = input.nextLine();
+                    System.out.print("Enter new Publication Year: ");
+                    int pubYear = input.nextInt();
+                    System.out.print("Enter new Quantity: ");
+                    int quantity = input.nextInt();
+                    input.nextLine(); // Consume newline
+
+                    // Update member data
+                    parts[1] = title;
+                    parts[2] = author;
+                    parts[3] = publisher;
+                    parts[4] = String.valueOf(pubYear);
+                    parts[5] = String.valueOf(quantity);
+
+                    // Construct updated book data string and add it to the list
+                    updatedBookData.add(String.join(", ", parts));
+                    found = true;
+                } else {
+                    updatedBookData.add(line);
+                }
+            }
+            if (!found) {
+                System.out.println("book not found.");
+                return;
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading book data: " + e.toString());
+            return;
+        }
+
+        // Rewrite all the updated book data back to the file
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(BOOK_FILE))) {
+            for (String bookData : updatedBookData) {
+                writer.write(bookData);
+                writer.newLine(); // Add a new line after each entry
+            }
+            System.out.println("book edited successfully.");
+        } catch (IOException e) {
+            System.out.println("Error writing book data: " + e.toString());
+        }
+    }
+
+    public static void writeBooksToFile() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(BOOK_FILE, true))) {
+            // Write data to the file
+            for (int i = 0; i < isbn.size(); i++) {
+                writer.write(isbn.get(i) + "," + titles.get(i) + "," + authors.get(i) + "," + publishers.get(i) + "," + publicationYrs.get(i) + "," + quantities.get(i) + "," + availability.get(i));
+                writer.newLine();
+            }
+            System.out.println("Books data successfully written to file.");
+        } catch (IOException e) {
+            System.out.println("Error writing books data: " + e.getMessage());
+        }
+    }
+    
+// Member menu and methods
+    public static void memberMenu() {
+        while (true) {
+            Scanner input = new Scanner(System.in);
+            System.out.println("\nMember Management");
+            System.out.println("1. Add Member");
+            System.out.println("2. Display All Member");
+            System.out.println("3. Delete Member");
+            System.out.println("4. Edit Member");
+            System.out.println("5. Back to Main Menu");
+            System.out.print("Enter your choice: ");
+            int choice = input.nextInt();
+            input.nextLine(); 
+
+            switch (choice) {
+                case 1:
+                    addMember();
+                    break;
+                case 2:
+                    displayMember();
+                    break;
+                case 3:
+                    searchMember();
+                    break;
+                case 4:
+                    deleteMember();
+                    break;
+                case 5:
+                    editMember();
+                    break;
+                case 6:
+                    return;
+                default:
+                    System.out.println("Invalid choice. try again");
+            }
+        }
+    }
+
+    public static void addMember() {
+        Scanner input = new Scanner(System.in);
+        System.out.print("Enter Member ID: ");
+        int id = input.nextInt();
+        input.nextLine();
+        System.out.print("Enter Name: ");
+        String name = input.nextLine();
+        System.out.print("Enter Email: ");
+        String email = input.nextLine();
+        System.out.print("Enter Phone: ");
+        int phone = input.nextInt();
+        input.nextLine();
+
+        memberIDs.add(id);
+        memberNames.add(name);
+        memberEmails.add(email);
+        memberPhones.add(phone);
+
+        writeMemberToFile();
+        System.out.println("Member added successfully.");
+    }
+
+    public static void displayMember() {
+    System.out.printf("%-10s %-20s %-30s %-15s%n", "ID", "Name", "Email", "Phone");
+    try (BufferedReader reader = new BufferedReader(new FileReader(MEMBER_FILE))) {
+        String line;
+        while ((line = reader.readLine()) != null) {
+            String[] parts = line.split(",");
+            if (parts.length >= 4) {
+                try {
+                    int id = Integer.parseInt(parts[0].trim()); //trim leading whitespace
+                    String name = parts[1].trim();
+                    String email = parts[2].trim();
+                    String phone = parts[3].trim(); //trim leading whitespace
+                    System.out.printf("%-10d %-20s %-30s %-15s%n", id, name, email, phone);
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid data format (NumberFormatException): " + line);
+                }
+            } else {
+                System.out.println("Invalid data format (not enough parts): " + line);
+            }
+        }
+    } catch (IOException e) {
+        System.out.println("Error reading member data: " + e.toString());
+    }
+}
+
+    public static void searchMember() {
+    Scanner input = new Scanner(System.in);
+    System.out.print("Enter Member ID to search: ");
+    int memberId = input.nextInt();
+    input.nextLine();
+
+    boolean found = false;
+
+    try (BufferedReader reader = new BufferedReader(new FileReader(MEMBER_FILE))) {
+        String line;
+        while ((line = reader.readLine()) != null) {
+            String[] parts = line.split(",");
+            int id = Integer.parseInt(parts[0].trim());
+            if (id == memberId) {
+                found = true;
+                String name = parts[1].trim();
+                String email = parts[2].trim();
+                String phone = parts[3].trim();
+
+                System.out.println("Member found:");
+                System.out.println("ID: " + id);
+                System.out.println("Name: " + name);
+                System.out.println("Email: " + email);
+                System.out.println("Phone: " + phone);
+                break;
+            }
+        }
+        if (!found) {
+            System.out.println("Member not found.");
+        }
+    } catch (IOException e) {
+        System.out.println("Error reading member data: " + e.toString());
+    }
+}
+
+    public static void deleteMember() {
+
+        System.out.print("Enter Member ID to delete: ");
+        Scanner input = new Scanner(System.in);
+        int i = input.nextInt();
+        input.nextLine();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(MEMBER_FILE))) {
+            ArrayList<String> lines = new ArrayList<>();
+            String line;
+            boolean found = false;
+
+            //reading file lineby line
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (Integer.parseInt(parts[0].trim()) == i) {
+                    //check if id matches
+                    found = true;
+                } else {
+                    lines.add(line); //add line tolist if ISBN doesn't match
+                }
+            }
+            if (found) {
+                //overwrite file with updated data (excluding the deleted book)
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter(MEMBER_FILE))) {
+                    for (String updatedLine : lines) {
+                        writer.write(updatedLine);
+                        writer.newLine();
+                    }
+                }
+                System.out.println("Member deleted successfully.");
+            } else {
+                System.out.println("Member not found.");
+            }
+        } catch (IOException e) {
+            System.out.println("Error deleting member: " + e.toString());
+        }
+
+    }
+
+    public static void editMember() {
+        Scanner input = new Scanner(System.in);
+        System.out.print("Enter Member ID to edit: ");
+        int id = input.nextInt();
+        input.nextLine(); // Consume newline
+
+        // Temporary storage for updated member data
+        ArrayList<String> updatedMemberData = new ArrayList<>();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(MEMBER_FILE))) {
+            String line;
+            boolean found = false;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                int memberId = Integer.parseInt(parts[0].trim());
+                if (memberId == id) {
+                    // Member found, prompt for new data
+                    System.out.print("Enter new Name: ");
+                    String name = input.nextLine();
+                    System.out.print("Enter new email: ");
+                    String email = input.nextLine();
+                    System.out.print("Enter new Phone no.: ");
+                    String phone = input.nextLine();
+
+                    // Update member data
+                    parts[1] = name;
+                    parts[2] = email;
+                    parts[3] = phone;
+
+                    // Construct the updated member data string and add it to the list
+                    updatedMemberData.add(String.join(", ", parts));
+                    found = true;
+                } else {
+                    // If not the member to edit, add the existing data as it is
+                    updatedMemberData.add(line);
+                }
+            }
+            if (!found) {
+                System.out.println("Member not found.");
+                return;
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading member data: " + e.getMessage());
+            return;
+        }
+
+        // Rewrite all the updated member data back to the file
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(MEMBER_FILE))) {
+            for (String memberData : updatedMemberData) {
+                writer.write(memberData);
+                writer.newLine(); //Add a line after each member entry
+            }
+            System.out.println("Member edited successfully.");
+        } catch (IOException e) {
+            System.out.println("Error writing member data: " + e.toString());
+        }
+    }
+
+    public static void writeMemberToFile() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(MEMBER_FILE, true))) {
+            // Write data to the file
+            for (int i = 0; i < memberIDs.size(); i++) {
+                writer.write(memberIDs.get(i) + " , " + memberNames.get(i) + " , " + memberEmails.get(i) + " , " + memberPhones.get(i));
+                writer.newLine();
+            }
+            System.out.println("Member data successfully written to file.");
+        } catch (IOException e) {
+            System.out.println("Error writing member data: " + e.toString());
+        }
+    }
+
+// staff menu and methods
+    public static void staffMenu() {
+        while (true) {
+            Scanner input = new Scanner(System.in);
+            System.out.println("\nStaff Management");
+            System.out.println("1. Add Staff");
+            System.out.println("2. Display All Staff");
+            System.out.println("3. Delete Staff");
+            System.out.println("4. Edit Staff");
+            System.out.println("5. Back to Main Menu");
+            System.out.print("Enter your choice: ");
+            int choice = input.nextInt();
+            input.nextLine(); // Consume newline
+
+            switch (choice) {
+                case 1:
+                    addStaff();
+                    break;
+                case 2:
+                    displayStaff();
+                    break;
+                case 3:
+                    searchStaff();
+                    break;
+                case 4:
+                    deleteStaff();
+                    break;
+                case 5:
+                    editStaff();
+                    break;
+                case 6:
+                    return;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
+
+    public static void addStaff() {
+        Scanner input = new Scanner(System.in);
+        System.out.print("Enter Staff ID: ");
+        int id = input.nextInt();
+        input.nextLine();
+        System.out.print("Enter Name: ");
+        String name = input.nextLine();
+        System.out.print("Enter Email: ");
+        String email = input.nextLine();
+        System.out.print("Enter Phone: ");
+        int phone = input.nextInt();
+        input.nextLine(); 
+        System.out.print("Enter Hire Date (YYYY-MM-DD): ");
+        String hireDate = input.nextLine();
+        System.out.print("Enter Salary: ");
+        double salary = input.nextDouble();
+        input.nextLine();
+
+        staffIDs.add(id);
+        staffNames.add(name);
+        staffEmails.add(email);
+        staffPhones.add(phone);
+        hireDates.add(hireDate);
+        salaries.add(salary);
+
+        writeStaffToFile();
+        System.out.println("Staff added successfully.");
+    }
+
+    public static void displayStaff() {
+    System.out.printf("%-5s %-20s %-30s %-15s %-15s %-10s%n", "ID", "Name", "Email", "Phone", "Hire Date", "Salary");
+    try (BufferedReader reader = new BufferedReader(new FileReader(STAFF_FILE))) {
+        String line;
+        while ((line = reader.readLine()) != null) {
+            String[] parts = line.split(",");
+            if (parts.length >= 6) { //ensure enough parts
+                try {
+                    int id = Integer.parseInt(parts[0].trim()); //Trim leading whitespaces
+                    String name = parts[1].trim();
+                    String email = parts[2].trim();
+                    int phone = Integer.parseInt(parts[3].trim());
+                    String hireDate = parts[4].trim();
+                    double salary = Double.parseDouble(parts[5].trim());
+                    System.out.printf("%-5d %-20s %-30s %-15d %-15s %-10.2f%n", id, name, email, phone, hireDate, salary);
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid data format (NumberFormatException): " + line);
+                }
+            } else {
+                System.out.println("Invalid data format (not enough parts): " + line);
+            }
+        }
+    } catch (IOException e) {
+        System.out.println("Error reading staff data: " + e.toString());
+    }
+}
+
+    
+    public static void searchStaff() {
+    Scanner input = new Scanner(System.in);
+    System.out.print("Enter Staff ID to search: ");
+    int staffId = input.nextInt();
+    input.nextLine();
+
+    boolean found = false;
+
+    try (BufferedReader reader = new BufferedReader(new FileReader(STAFF_FILE))) {
+        String line;
+        while ((line = reader.readLine()) != null) {
+            String[] parts = line.split(",");
+            int id = Integer.parseInt(parts[0].trim());
+            if (id == staffId) {
+                found = true;
+                String name = parts[1].trim();
+                String email = parts[2].trim();
+                String phone = parts[3].trim();
+                String hireDate = parts[4].trim();
+                double salary = Double.parseDouble(parts[5].trim());
+
+                System.out.println("Staff found:");
+                System.out.println("ID: " + id);
+                System.out.println("Name: " + name);
+                System.out.println("Email: " + email);
+                System.out.println("Phone: " + phone);
+                System.out.println("Hire Date: " + hireDate);
+                System.out.println("Salary: " + salary);
+                break;
+            }
+        }
+        if (!found) {
+            System.out.println("Staff not found.");
+        }
+    } catch (IOException e) {
+        System.out.println("Error reading staff data: " + e.toString());
+    }
+}
+
+    public static void deleteStaff() {
+        System.out.print("Enter Staff ID to delete: ");
+        Scanner input = new Scanner(System.in);
+        int s = input.nextInt();
+        input.nextLine(); // Consume newline 
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(STAFF_FILE))) {
+            ArrayList<String> lines = new ArrayList<>();
+            String line;
+            boolean found = false;
+
+            //reading file lineby line
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (Integer.parseInt(parts[0].trim()) == s) {
+                    //check if id matches
+                    found = true;
+                } else {
+                    lines.add(line); //add line to list if id doesn't match
+                }
+            }
+            if (found) {
+                //overwrite file with updated data (excluding the deleted book)
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter(STAFF_FILE))) {
+                    for (String updatedLine : lines) {
+                        writer.write(updatedLine);
+                        writer.newLine();
+                    }
+                }
+                System.out.println("staff deleted successfully.");
+            } else {
+                System.out.println("staff not found.");
+            }
+        } catch (IOException e) {
+            System.out.println("Error deleting member: " + e.toString());
+        }
+
+    }
+
+    public static void editStaff() {
+        Scanner input = new Scanner(System.in);
+        System.out.print("Enter Staff ID to edit: ");
+        int id = input.nextInt();
+        input.nextLine(); // Consume newline
+
+        // Temporary storage for updated member data
+        ArrayList<String> updatedStaffData = new ArrayList<>();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(STAFF_FILE))) {
+            String line;
+            boolean found = false;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                int memberId = Integer.parseInt(parts[0].trim());
+                if (memberId == id) {
+                    // Member found, prompt for new data
+                    System.out.print("Enter new Name: ");
+                    String name = input.nextLine();
+                    System.out.print("Enter new email: ");
+                    String email = input.nextLine();
+                    System.out.print("Enter new Phone no.: ");
+                    String phone = input.nextLine();
+                    input.nextLine(); // Consume newline
+                    System.out.print("Enter new Hire Date (YYYY-MM-DD): ");
+                    String hireDate = input.nextLine();
+                    System.out.print("Enter new Salary: ");
+                    double salary = input.nextDouble();
+                    input.nextLine(); // Consume newline
+
+                    // Update staff data
+                    parts[1] = name;
+                    parts[2] = email;
+                    parts[3] = phone;
+                    parts[4] = hireDate;
+                    parts[5] = String.valueOf(salary);
+
+                    // Construct the updated member data string and add it to the list
+                    updatedStaffData.add(String.join(", ", parts));
+                    found = true;
+                } else {
+                    // If not the member to edit, add the existing data as it is
+                    updatedStaffData.add(line);
+                }
+            }
+            if (!found) {
+                System.out.println("Staff not found.");
+                return;
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading staff data: " + e.toString());
+            return;
+        }
+
+        // Rewrite all the updated staff data back to the file
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(STAFF_FILE))) {
+            for (String memberData : updatedStaffData) {
+                writer.write(memberData);
+                writer.newLine(); // Add a new line after each entry
+            }
+            System.out.println("Staff edited successfully.");
+        } catch (IOException e) {
+            System.out.println("Error writing member data: " + e.toString());
+        }
+    }
+
+    public static void writeStaffToFile() {
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(STAFF_FILE, true))) {
+            //write data to file
+            for (int i = 0; i < staffIDs.size(); i++) {
+                writer.write(staffIDs.get(i) + " , " + staffNames.get(i) + " , " + staffEmails.get(i) + " , " + staffPhones.get(i) + " , " + hireDates.get(i) + " , " + salaries.get(i));
+                writer.newLine();
+            }
+            System.out.println("Member data successfully written to file.");
+        } catch (IOException e) {
+            System.out.println("Error writing member data: " + e.toString());
+        }
+
+    }
+
+}//class
