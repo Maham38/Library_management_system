@@ -1,5 +1,7 @@
 The Library Information System project aims to provide a digital platform for managing library operations efficiently. It facilitates efficient management of library resources, members, and staff, providing librarians and administrators with a reliable tool to streamline library operations and enhance user experience. 
+
 Key features and functionalities:
+
 Primary user will be the library admin 
 	Username: admin
 	Password: 123
